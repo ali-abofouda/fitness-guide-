@@ -6,9 +6,7 @@ import {
   ChevronLeft, ChevronRight, Clock, Lightbulb, ArrowDown,
   Droplets, Target, MapPin, CalendarDays, Ruler, Weight,
   TrendingUp, Brain, CheckCircle2, CircleDot, Home, Medal,
-  Download,
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import './App.css';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -376,7 +374,6 @@ function App() {
   const [dashboard, setDashboard] = useState(() => savedDash.current);
   const [activeDay, setActiveDay] = useState(0);
   const [errors, setErrors] = useState({});
-  const [isExporting, setIsExporting] = useState(false);
   const dashRef = useRef(null);
 
   /* ── Auto-save form fields to localStorage ── */
@@ -424,30 +421,6 @@ function App() {
     setActiveDay(0);
     setStep(totalSteps); // move past wizard
     setTimeout(() => dashRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-  }
-
-  /* ── Export Dashboard as Image ── */
-  async function exportAsImage() {
-    if (!dashRef.current) return;
-    setIsExporting(true);
-    // Wait for React to hide the export button via state
-    await new Promise((r) => setTimeout(r, 100));
-    try {
-      const canvas = await html2canvas(dashRef.current, {
-        backgroundColor: '#0b0b16',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-      const link = document.createElement('a');
-      link.download = `Fitness-AI-Plan-${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    } catch (err) {
-      console.error('Export failed:', err);
-    } finally {
-      setIsExporting(false);
-    }
   }
 
   /* ── Reset (clears localStorage too) ── */
@@ -627,14 +600,7 @@ function App() {
           {/* Top bar */}
           <div className="dash-top-bar">
             <h1 className="dash-title"><Brain size={24} /> لوحة اللياقة الذكية</h1>
-            <div className="dash-actions">
-              {!isExporting && (
-                <button className="export-btn" onClick={exportAsImage}>
-                  <Download size={16} /> حفظ كصورة
-                </button>
-              )}
-              <button className="reset-btn" onClick={reset}><ArrowDown size={16} style={{ transform: 'rotate(180deg)' }} /> خطة جديدة</button>
-            </div>
+            <button className="reset-btn" onClick={reset}><ArrowDown size={16} style={{ transform: 'rotate(180deg)' }} /> خطة جديدة</button>
           </div>
 
           {/* ── Stat Cards ── */}
@@ -747,14 +713,6 @@ function App() {
               </div>
             </div>
           </div>
-
-          {/* Export Watermark — visible only inside captured image */}
-          {isExporting && (
-            <div className="export-watermark">
-              <Dumbbell size={16} />
-              <span>صُنع بواسطة Fitness AI Dashboard</span>
-            </div>
-          )}
 
           {/* Footer */}
           <footer className="site-footer">
