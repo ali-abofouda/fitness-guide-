@@ -323,35 +323,68 @@ function Routine({ title, Icon, items, accent }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   LOCALSTORAGE HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+const LS_KEY_FORM = 'fitnessAI_form';
+const LS_KEY_DASH = 'fitnessAI_dashboard';
+
+function loadJSON(key) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }
+  catch { return null; }
+}
+function saveJSON(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch { /* quota */ }
+}
+function clearLS() {
+  localStorage.removeItem(LS_KEY_FORM);
+  localStorage.removeItem(LS_KEY_DASH);
+}
+
+/* ═══════════════════════════════════════════════════════════════
    MAIN APP
    ═══════════════════════════════════════════════════════════════ */
 function App() {
+  /* ── Restore saved state (if any) ── */
+  const savedForm = useRef(loadJSON(LS_KEY_FORM));
+  const savedDash = useRef(loadJSON(LS_KEY_DASH));
+  const sf = savedForm.current || {};
+
   /* ── Wizard State ── */
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => savedDash.current ? 4 : (sf.step ?? 0));
   const totalSteps = 4;
 
   // Step 1: Bio
-  const [gender, setGender] = useState('male');
-  const [age, setAge] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
+  const [gender, setGender] = useState(() => sf.gender ?? 'male');
+  const [age, setAge] = useState(() => sf.age ?? '');
+  const [height, setHeight] = useState(() => sf.height ?? '');
+  const [weight, setWeight] = useState(() => sf.weight ?? '');
 
   // Step 2: Status
-  const [activity, setActivity] = useState('active');
-  const [injury, setInjury] = useState('None');
+  const [activity, setActivity] = useState(() => sf.activity ?? 'active');
+  const [injury, setInjury] = useState(() => sf.injury ?? 'None');
 
   // Step 3: Goals
-  const [goal, setGoal] = useState('lose');
-  const [location, setLocation] = useState('gym');
+  const [goal, setGoal] = useState(() => sf.goal ?? 'lose');
+  const [location, setLocation] = useState(() => sf.location ?? 'gym');
 
   // Step 4: Frequency
-  const [days, setDays] = useState(4);
+  const [days, setDays] = useState(() => sf.days ?? 4);
 
   // Dashboard
-  const [dashboard, setDashboard] = useState(null);
+  const [dashboard, setDashboard] = useState(() => savedDash.current);
   const [activeDay, setActiveDay] = useState(0);
   const [errors, setErrors] = useState({});
   const dashRef = useRef(null);
+
+  /* ── Auto-save form fields to localStorage ── */
+  useEffect(() => {
+    saveJSON(LS_KEY_FORM, { step, gender, age, height, weight, activity, injury, goal, location, days });
+  }, [step, gender, age, height, weight, activity, injury, goal, location, days]);
+
+  /* ── Auto-save dashboard to localStorage ── */
+  useEffect(() => {
+    if (dashboard) saveJSON(LS_KEY_DASH, dashboard);
+  }, [dashboard]);
 
   /* ── Validation ── */
   function validateStep() {
@@ -390,11 +423,16 @@ function App() {
     setTimeout(() => dashRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   }
 
-  /* ── Reset ── */
+  /* ── Reset (clears localStorage too) ── */
   function reset() {
+    clearLS();
     setDashboard(null);
     setStep(0);
+    setGender('male'); setAge(''); setHeight(''); setWeight('');
+    setActivity('active'); setInjury('None');
+    setGoal('lose'); setLocation('gym'); setDays(4);
     setActiveDay(0);
+    setErrors({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
