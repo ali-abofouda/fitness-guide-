@@ -76,6 +76,7 @@
 | [React 19](https://react.dev/) | مكتبة بناء واجهات المستخدم |
 | [Vite 7](https://vite.dev/) | أداة بناء فائقة السرعة |
 | [Lucide React](https://lucide.dev/) | مكتبة أيقونات SVG خفيفة |
+| [html2canvas](https://html2canvas.hertzen.com/) | تصدير لوحة التحكم كصورة PNG |
 | CSS3 | Glassmorphism · Animations · Grid · Flexbox |
 | ESLint 9 | فحص جودة الكود |
 
@@ -212,7 +213,7 @@ git push origin feature/amazing-feature
 - [ ] إضافة مؤقت راحة بين المجموعات
 - [ ] تتبّع التقدم الأسبوعي بالرسوم البيانية
 - [ ] وضع مظلم / فاتح قابل للتبديل
-- [ ] تصدير الجدول كـ PDF
+- [x] تصدير الجدول كصورة PNG (html2canvas)
 - [ ] دعم اللغة الإنجليزية (i18n)
 
 ---
